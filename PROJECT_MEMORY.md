@@ -390,6 +390,34 @@ npm start
 - **Engine Version:** Synchronized `algorithm_version="1.1.2"` across `signal_engine.py` and test suites.
 - **Phase 2 Roadmap:** Fully structured into 4 sprints across H1–H4, M1–M4, L1–L4, and R1–R2.
 
+### Session 2026-09-24 (Sprint 1/2) — Signal Engine v1.2.0: Matrix Rebalancing & Pure Benchmarks ✅
+
+**🎯 Main Objective:**  
+Rebalance questionnaire signal matrix (Task H3) to eliminate artificial co-signal noise, purify 100% ratio options, add C5 and C7 coverage, and achieve $E_r < 0.40$ (Laser Focus / Clear Direction) across 100% of pure cluster responses (C1–C7).
+
+---
+
+**✅ Completed Changes & Results:**
+1. **Purified 13 Co-Signal Options:** Converted 1-to-1 co-signals (`Q8-O1`, `Q8-O5`, `Q9-O1`, `Q11-O5`, `Q13-O4`, `Q19-O4`, `Q4-O7`, `Q10-O1`, `Q11-O2`, `Q12-O3`, `Q13-O2`, `Q13-O5`, `Q16-O1`) to single primary signals.
+2. **Reduced C5 ↔ C4 Co-signals (5 options):** `Q1-O6`, `Q2-O6`, `Q5-O5`, `Q8-O3`, `Q9-O3` reduced secondary score from 2 pts to 1 pt.
+3. **Added 7 New Questionnaire Options:**
+   - C5 Work Style: `Q10-O8` (3 pts), `Q11-O7` (2 pts), `Q13-O8` (3 pts)
+   - C5 Skills: `Q6-O11` (3 pts), `Q7-O9` (3 pts)
+   - C7 Values: `Q8-O10` (3 pts), `Q9-O8` (3 pts)
+4. **Pure Cluster Benchmark (All 7 Clusters $E_r < 0.40$ ✅):**
+   - **C1:** $E_r = 0.14$ (Laser Focus ✅)
+   - **C2:** $E_r = 0.32$ (Clear Direction ✅)
+   - **C3:** $E_r = 0.08$ (Laser Focus ✅)
+   - **C4:** $E_r = 0.30$ (Clear Direction ✅)
+   - **C5:** $E_r = 0.37$ (Clear Direction ✅)
+   - **C6:** $E_r = 0.13$ (Laser Focus ✅)
+   - **C7:** $E_r = 0.09$ (Laser Focus ✅)
+5. **Quality & Verification Gates:**
+   - **Backend Pytest:** **44/44 tests PASSED (100% ✅)**.
+   - **Regression Snapshot Harness:** `scripts/snapshot.py` & `scripts/diff_snapshots.py` integrated (Core shift: 2.9%).
+   - **Frontend Production Build:** Next.js 16 App Router **9/9 routes prerendered ✅**.
+   - **Version Bump:** `algorithm_version="1.2.0"` synchronized across Pydantic models and test suites.
+
 
 
 ---

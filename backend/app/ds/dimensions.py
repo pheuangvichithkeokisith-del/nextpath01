@@ -49,7 +49,7 @@ CANONICAL_CLUSTERS: Dict[str, ClusterDefinition] = {
         label_lao="ສາຍສຸຂະພາບ, ການແພດ ແລະ ການເບິ່ງແຍງ",
         description_lao="ທິດທາງກ່ຽວກັບວິທະຍາສາດສຸຂະພາບ, ການແພດ, ການພະຍາບານ ແລະ ການດູແລ",
         interest_option_codes={"Q1-O6", "Q2-O8", "Q4-O5"},
-        skill_option_codes={"Q5-O5"},
+        skill_option_codes={"Q5-O5", "Q6-O11", "Q7-O9"},
         learning_option_codes={"Q14-O9", "Q16-O1", "Q20-O3"},
     ),
     "C6": ClusterDefinition(

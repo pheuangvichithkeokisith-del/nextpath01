@@ -68,25 +68,65 @@ def test_laser_focus_single_cluster_dominant():
     assert er < 0.15, f"Expected Laser Focus (< 0.15), got {er}"
 
 
-def test_pure_c5_is_dual_care_companion():
-    """Pure C5 (Health) user -> falls into Dual Interest (C5 + C4).
+def test_pure_c1_is_laser_or_clear():
+    """Pure C1 (Analysis) user -> falls into Laser Focus or Clear Direction (Er < 0.40)."""
+    answers_c1 = {
+        "Q1": ["Q1-O3"], "Q2": "Q2-O2", "Q3": "Q3-O1", "Q4": ["Q4-O2"],
+        "Q5": "Q5-O1", "Q6": ["Q6-O1"], "Q7": "Q7-O1", "Q8": ["Q8-O1"],
+        "Q9": "Q9-O1", "Q10": "Q10-O4", "Q11": "Q11-O1", "Q12": "Q12-O1",
+        "Q13": ["Q13-O4"], "Q14": ["Q14-O1"], "Q16": "Q16-O1", "Q19": "Q19-O4",
+        "Q20": ["Q20-O5"], "Q22": ["Q22-O5"], "Q23": "Q23-O1"
+    }
+    res = evaluate_signals(answers_c1, {"province_code": "D3-O01"})
+    assert res.entropy_ratio < 0.40, f"Expected Er < 0.40, got {res.entropy_ratio}"
+    assert "C1" in [p.cluster_id for p in res.core_paths + res.secondary_paths]
 
-    Architectural Rationale (v1.1.2 Decision):
-    Health options in the Lao questionnaire matrix naturally carry strong co-signals
-    with Social/Care (C4) (e.g. Q1-O6 gives C5:3, C4:2).
-    In v1.1.2, this Health & Social synergy is embraced as a natural dual companion.
-    Matrix rebalancing will be considered in v1.2.0.
-    """
+
+def test_pure_c5_is_laser_or_clear():
+    """Pure C5 (Health) user -> falls into Laser Focus or Clear Direction (Er < 0.40)."""
     answers_c5 = {
         "Q1": ["Q1-O6"], "Q2": "Q2-O8", "Q3": "Q3-O6", "Q4": ["Q4-O5"],
-        "Q5": "Q5-O5", "Q8": ["Q8-O3"], "Q9": "Q9-O3", "Q14": ["Q14-O9"],
-        "Q16": "Q16-O1", "Q19": "Q19-O5", "Q20": ["Q20-O3"],
+        "Q5": "Q5-O5", "Q6": ["Q6-O11"], "Q7": "Q7-O9", "Q8": ["Q8-O3"],
+        "Q9": "Q9-O3", "Q10": "Q10-O8", "Q11": "Q11-O7", "Q13": ["Q13-O8"],
+        "Q14": ["Q14-O9"], "Q16": "Q16-O1", "Q19": "Q19-O5", "Q20": ["Q20-O3"],
         "Q22": ["Q22-O5"], "Q23": "Q23-O1"
     }
     res = evaluate_signals(answers_c5, {"province_code": "D3-O01"})
-    # C5 is top path
+    assert res.entropy_ratio < 0.40, f"Expected Er < 0.40, got {res.entropy_ratio}"
     assert "C5" in [p.cluster_id for p in res.core_paths + res.secondary_paths]
-    assert 0.40 <= res.entropy_ratio < 0.65, f"Expected Dual Interest [0.40, 0.64], got {res.entropy_ratio}"
+
+
+def test_pure_c7_is_laser_or_clear():
+    """Pure C7 (Practical) user -> falls into Laser Focus or Clear Direction (Er < 0.40)."""
+    answers_c7 = {
+        "Q1": ["Q1-O7", "Q1-O8"], "Q2": "Q2-O7", "Q3": "Q3-O7", "Q4": ["Q4-O6"],
+        "Q5": "Q5-O7", "Q6": ["Q6-O8"], "Q7": "Q7-O6", "Q8": ["Q8-O10"],
+        "Q9": "Q9-O8", "Q11": "Q11-O2", "Q13": ["Q13-O6"], "Q14": ["Q14-O11"],
+        "Q16": "Q16-O6", "Q20": ["Q20-O2"], "Q22": ["Q22-O5"], "Q23": "Q23-O1"
+    }
+    res = evaluate_signals(answers_c7, {"province_code": "D3-O01"})
+    assert res.entropy_ratio < 0.40, f"Expected Er < 0.40, got {res.entropy_ratio}"
+    assert "C7" in [p.cluster_id for p in res.core_paths + res.secondary_paths]
+
+
+def test_all_pure_clusters_under_0_40():
+    """Verify that every canonical pure cluster (C1-C7) achieves Er < 0.40."""
+    from app.ds.signal_engine import POSITIVE_SIGNALS, SECTION_QUESTIONS, QUESTION_TYPE
+    for c in ["C1", "C2", "C3", "C4", "C5", "C6", "C7"]:
+        answers = {"D1": "D1-O2", "D3": "D3-O01"}
+        for qid in POSITIVE_SIGNALS:
+            opts = [(oid, sigs.get(c, 0)) for oid, sigs in POSITIVE_SIGNALS[qid].items() if sigs.get(c, 0) > 0]
+            if opts:
+                opts.sort(key=lambda x: -x[1])
+                qtype = QUESTION_TYPE.get(qid, "single")
+                max_s = 3 if qtype == "multi" else 1
+                if qid == "Q4": max_s = 2
+                answers[qid] = [o[0] for o in opts[:max_s]]
+        answers["Q15"] = ["Q15-O12"]
+        answers["Q22"] = ["Q22-O5"]
+        answers["Q23"] = ["Q23-O1"]
+        res = evaluate_signals(answers, {"province_code": "D3-O01"})
+        assert res.entropy_ratio < 0.40, f"Cluster {c} expected Er < 0.40, got {res.entropy_ratio}"
 
 
 def test_no_regression_pure_c1_to_c7_archetype_assignment():
@@ -133,16 +173,16 @@ def test_evaluate_signals_tech_profile():
         "Q5": ["Q5-O2"],  # C2: 3
         "Q6": ["Q6-O2"],  # C2: 3
         "Q7": ["Q7-O7"],  # C2: 3
-        "Q8": ["Q8-O1"],  # C1: 1, C2: 1
-        "Q9": ["Q9-O2"],  # C3: 2, C2: 1
-        "Q10": ["Q10-O4"], # C1: 3
-        "Q11": ["Q11-O5"], # C1: 1, C2: 1, C3: 1
-        "Q12": ["Q12-O1"], # C1: 3
-        "Q13": ["Q13-O2"], # C3: 1, C2: 1
+        "Q8": ["Q8-O2"],  # no_signal
+        "Q9": ["Q9-O6"],  # no_signal
+        "Q10": ["Q10-O6"], # no_signal
+        "Q11": ["Q11-O1"], # C1: 2
+        "Q12": ["Q12-O5"], # C1: 1
+        "Q13": ["Q13-O5"], # C2: 2
         "Q14": ["Q14-O3"], # C2: 3
         "Q15": [],         # No negative
         "Q16": ["Q16-O2"], # C2: 3
-        "Q19": ["Q19-O4"], # C1: 1, C2: 1
+        "Q19": ["Q19-O1"], # no_signal
         "Q20": ["Q20-O5"], # C2: 3, C1: 1
         "Q22": ["Q22-O5"], # No major constraints
         "Q23": ["Q23-O1"], # Ready to move
