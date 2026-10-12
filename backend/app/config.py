@@ -29,6 +29,8 @@ class Settings(BaseSettings):
         "http://127.0.0.1:3000",
         "http://localhost:8000",
         "http://127.0.0.1:8000",
+        "https://nextpath.la",
+        "https://www.nextpath.la",
     ]
 
     @field_validator("CORS_ORIGINS", mode="before")
@@ -43,6 +45,8 @@ class Settings(BaseSettings):
             "http://127.0.0.1:3000",
             "http://localhost:8000",
             "http://127.0.0.1:8000",
+            "https://nextpath.la",
+            "https://www.nextpath.la",
         ]
 
     # Form & System defaults

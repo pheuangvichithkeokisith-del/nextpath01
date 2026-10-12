@@ -1,5 +1,17 @@
 import type { NextConfig } from "next";
 
+const isProduction = process.env.NODE_ENV === "production";
+const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+
+const connectSources = [
+  "'self'",
+  "https://api.nextpath.la",
+  apiBase,
+  !isProduction ? "http://localhost:8000 http://127.0.0.1:8000" : "",
+]
+  .filter(Boolean)
+  .join(" ");
+
 const securityHeaders = [
   {
     key: "X-Frame-Options",
@@ -29,7 +41,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self' data:",
-      "connect-src 'self' http://localhost:8000 http://127.0.0.1:8000 https://api.nextpath.la",
+      `connect-src ${connectSources}`,
       "frame-src https://challenges.cloudflare.com",
       "object-src 'none'",
       "base-uri 'self'",

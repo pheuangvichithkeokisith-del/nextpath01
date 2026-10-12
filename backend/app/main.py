@@ -20,9 +20,9 @@ app = FastAPI(
     description=settings.PROJECT_DESCRIPTION,
     version="1.0.0",
     lifespan=lifespan,
-    docs_url="/docs" if settings.ENVIRONMENT != "production" else None,
-    redoc_url="/redoc" if settings.ENVIRONMENT != "production" else None,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json" if settings.ENVIRONMENT != "production" else None,
+    docs_url="/docs" if settings.ENVIRONMENT.lower() != "production" and settings.DEBUG else None,
+    redoc_url="/redoc" if settings.ENVIRONMENT.lower() != "production" and settings.DEBUG else None,
+    openapi_url=f"{settings.API_V1_STR}/openapi.json" if settings.ENVIRONMENT.lower() != "production" and settings.DEBUG else None,
 )
 
 # Cyber security response headers
