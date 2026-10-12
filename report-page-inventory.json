@@ -1,0 +1,311 @@
+{
+  "document": {
+    "name": "Next-path Report Page Inventory",
+    "route": "/report",
+    "source_files": [
+      "app/report/page.tsx",
+      "components/AiPromptModal.tsx",
+      "api/report.ts",
+      "types/report.ts",
+      "types/form.ts"
+    ],
+    "representation": "semantic inventory of the current rendered page; dynamic values are marked as bindings",
+    "frontend_only": true
+  },
+  "entry_conditions": {
+    "requires_resolved_session": true,
+    "requires_completed_session": true,
+    "missing_session_action": "redirect:/",
+    "incomplete_session_action": "redirect:/processing",
+    "not_found_session_action": "clear_session_and_redirect:/",
+    "loading_component": "Loading",
+    "error_component": "ErrorBanner"
+  },
+  "runtime_state": {
+    "report": "ReportResponse | null",
+    "hasError": "boolean",
+    "isAiModalOpen": "boolean",
+    "copiedLink": "boolean",
+    "downloading": "boolean",
+    "activeTab": "0..6",
+    "retryToken": "number",
+    "showProof": "boolean",
+    "userDraft": "DraftAnswers"
+  },
+  "report_response_schema": {
+    "response_pattern": [
+      {
+        "section": "string",
+        "pattern_id": "string",
+        "label_lao": "string",
+        "is_sample": "boolean"
+      }
+    ],
+    "possible_paths": [
+      {
+        "group_id": "string",
+        "label_lao": "string",
+        "is_sample": "boolean"
+      }
+    ],
+    "context_factors": {
+      "age_band": "string | null",
+      "province_code": "string | null",
+      "has_constraints": "boolean"
+    },
+    "unknowns": ["string"],
+    "versions": {
+      "ds": "string",
+      "enc": "string",
+      "form": "string"
+    },
+    "summary_text": "string",
+    "template_id": "string",
+    "ai_version": "string"
+  },
+  "ready_page": {
+    "layout": {
+      "container": "max-w-4xl mx-auto",
+      "background": "#F9F8F5 paper-grain",
+      "card_style": "white rounded-2xl/3xl border #E5E1D8",
+      "main_sections": [
+        "context_banner",
+        "action_bar",
+        "tab_navigation",
+        "active_tab_content",
+        "ai_prompt_cta",
+        "ai_prompt_modal"
+      ]
+    },
+    "context_banner": {
+      "brand": "Next-path",
+      "label": "ບົດສະທ້ອນຕົນເອງ (Self-reflection Report)",
+      "age": {
+        "binding": "report.context_factors.age_band",
+        "fallback": "ອາຍຸ 15+"
+      },
+      "province": {
+        "binding": "report.context_factors.province_code",
+        "fallback": "ປະເທດລາວ"
+      },
+      "top_path_badge": {
+        "visible_when": "report.possible_paths[0] exists",
+        "label_prefix": "ທິດທາງຫຼັກທີ່ພົບ:",
+        "binding": "report.possible_paths[0].label_lao"
+      },
+      "heading": "ແວ່ນແຍງສະທ້ອນຕົວຕົນ ແລະ ເສັ້ນທາງທີ່ໜ້າລອງ",
+      "summary": {
+        "binding": "report.summary_text"
+      }
+    },
+    "action_bar": [
+      {
+        "id": "open_ai_prompt",
+        "label": "ຄັດລອກຄຳຖາມໄປຄຸຍກັບ AI",
+        "action": "setIsAiModalOpen(true)"
+      },
+      {
+        "id": "print_report",
+        "label": "ພິມລາຍງານ (Print)",
+        "action": "window.print()"
+      },
+      {
+        "id": "share_report",
+        "label": "ແບ່ງປັນ",
+        "success_label": "ຄັດລອກລິ້ງແລ້ວ",
+        "primary_action": "navigator.share({ title, text, url })",
+        "fallback_action": "navigator.clipboard.writeText(window.location.href)"
+      },
+      {
+        "id": "download_json",
+        "label": "ດາວໂຫລດ JSON",
+        "loading_label": "ກຳລັງດາວໂຫລດ...",
+        "endpoint": "/api/v1/sessions/{session_id}/export?format=json",
+        "filename": "nextpath-reflection-{session_id}.json"
+      },
+      {
+        "id": "start_new",
+        "label": "ເລີ່ມຕົ້ນໃໝ່",
+        "confirmation": "ເລີ່ມຕົ້ນການສຳຫຼວດຮອບໃໝ່? ຂໍ້ມູນເກົ່າຈະຖືກລຶບ ແລະ ສ້າງການສຳຫຼວດໃໝ່.",
+        "action": "clear session + clear draft + redirect:/introduction"
+      }
+    ],
+    "tabs": [
+      {
+        "id": 0,
+        "label": "1. ພາບລວມຕົນເອງ",
+        "content_id": "overview",
+        "content": {
+          "heading": "ຮູບແບບຄວາມສົນໃຈ ແລະ ທ່າແຮງ (Interest Patterns)",
+          "description": "ສັນຍານເຫຼົ່ານີ້ມາຈາກກິດຈະກຳທີ່ເຈົ້າເລືອກວ່າເຮັດແລ້ວມີຄວາມສຸກ ແລະ ຮູ້ສຶກເປັນຕົວຂອງຕົວເອງ",
+          "visual": {
+            "type": "svg_radar",
+            "title": "🧭 ແຜນທີ່ເຂັມທິດ 8 ມິຕິ (Compass Radar Dimensions)",
+            "description": "ສະແດງຄວາມສົມດຸນ ແລະ ຄວາມເຂັ້ມຂຸ້ນຂອງແຕ່ລະມິຕິໃນຕົວເຈົ້າ",
+            "dimensions": [
+              "ຄວາມສົນໃຈ (Interests)",
+              "ທັກສະ (Skills)",
+              "ຄ່ານິຍົມ (Values)",
+              "ຮູບແບບວຽກ (Work Style)",
+              "ການຮຽນຮູ້ (Learning)",
+              "ເປົ້າໝາຍ (Goals)",
+              "ຄວາມເປັນໄປໄດ້ (Feasibility)",
+              "ຄວາມຍືດຢຸ່ນ (Flexibility)"
+            ],
+            "score_source": "derived from userDraft; fallback defaults exist"
+          },
+          "score_bars": {
+            "source": "radarDimensions",
+            "display": "dimension name + English name + percentage bar"
+          }
+        }
+      },
+      {
+        "id": 1,
+        "label": "2. ຮູບແບບທີ່ພົບ",
+        "content_id": "patterns",
+        "content": {
+          "heading": "ຈຸດເຊື່ອມໂຍງລະຫວ່າງສິ່ງທີ່ເຈົ້າສົນໃຈ, ວິທີຄິດ ແລະ ສະພາບແວດລ້ອມ",
+          "data_source": "report.response_pattern",
+          "item_fields": ["section", "label_lao", "pattern_id", "is_sample"],
+          "empty_state": "ບໍ່ພົບຮູບແບບສະເພາະ"
+        }
+      },
+      {
+        "id": 2,
+        "label": "3. ທິດທາງສຳຫຼວດ",
+        "content_id": "possible_paths",
+        "content": {
+          "heading": "ທາງເລືອກທີ່ສອດຄ່ອງກັບຈຸດພິເສດຂອງເຈົ້າ",
+          "description": "ບໍ່ແມ່ນການບັງຄັບເລືອກອາຊີບ ແຕ່ເປັນຕົວຢ່າງຂອງສິ່ງທີ່ກຳລັງພັດທະນາໃນສັງຄົມລາວ ບໍ່ມີການຈັດອັນດັບຄະແນນ",
+          "data_source": "report.possible_paths",
+          "item_fields": ["group_id", "label_lao", "is_sample"],
+          "display_prefix": "ທາງເລືອກທີ {index}",
+          "empty_state": "ບໍ່ພົບເສັ້ນທາງສະເພາະ"
+        }
+      },
+      {
+        "id": 3,
+        "label": "4. ສິ່ງທີ່ຍັງເປີດກວ້າງ",
+        "content_id": "unknowns",
+        "content": {
+          "heading": "ສິ່ງທີ່ຍັງບໍ່ຈຳເປັນຕ້ອງມີຄຳຕອບໃນຕອນນີ້",
+          "description": "ຄວາມບໍ່ແນ່ໃຈຄືໂອກາດໃນການຄົ້ນຫາ ບໍ່ແມ່ນຄວາມອ່ອນແອ ຫຼື ຂໍ້ຜິດພາດ.",
+          "data_source": "report.unknowns",
+          "empty_state": "ບໍ່ມີສິ່ງທີ່ຍັງບໍ່ແນ່ໃຈສະເພາະ"
+        }
+      },
+      {
+        "id": 4,
+        "label": "5. ການທົດລອງນ້ອຍໆ",
+        "content_id": "micro_experiments",
+        "content": {
+          "heading": "ລອງເຮັດສິ່ງເຫຼົ່ານີ້ ໂດຍບໍ່ມີຄວາມກົດດັນ",
+          "description": "ການລົງມືເຮັດຕົວຈິງ 20-30 ນາທີ ຈະຊ່ວຍຕອບຄຳຖາມໃນໃຈໄດ້ດີກວ່າການນັ່ງຄິດຄົນດຽວ",
+          "items": [
+            {
+              "title": "1. ສົນທະນາສັ້ນໆ (15 ນາທີ)",
+              "body": "ລອງປຶກສາ ຫຼື ລົມກັບຜູ້ທີ່ກຳລັງເຮັດວຽກໃນສາຍທີ່ເຈົ້າສົນໃຈ ຖາມກ່ຽວກັບວຽກປະຈຳວັນຕົວຈິງ."
+            },
+            {
+              "title": "2. ທົດລອງເຮັດຈິງ (1 ອາທິດ)",
+              "body": "ລອງເຮັດໂປຣເຈັກນ້ອຍໆ 1 ອາທິດ ຫຼື ຮຽນຄອສຟຣີອອນລາຍສັ້ນໆ ເພື່ອສຳຜັດເນື້ອຫາແທ້."
+            },
+            {
+              "title": "3. ສັງເກດຕົວຈິງ (Field Observation)",
+              "body": "ເຂົ້າຮ່ວມກິດຈະກຳ, ເວທີສຳມະນາ, ງານວາງສະແດງ ຫຼື ງານອາສາສະໝັກໃນຊຸມຊົນ."
+            }
+          ]
+        }
+      },
+      {
+        "id": 5,
+        "label": "6. ວິທີລົມກັບພໍ່ແມ່",
+        "content_id": "family_bridge",
+        "content": {
+          "heading": "ວິທີເລົ່າໃຫ້ພໍ່ແມ່ ແລະ ຄອບຄົວເຂົ້າໃຈຢ່າງສະບາຍໃຈ",
+          "description": "ພໍ່ແມ່ສ່ວນໃຫຍ່ເປັນຫ່ວງເລື່ອງ ຄວາມໝັ້ນຄົງ ແລະ ອະນາຄົດ",
+          "items": [
+            "ເລີ່ມຕົ້ນດ້ວຍຄວາມຂອບໃຈ ແລະ ຮັບຟັງຄວາມເປັນຫ່ວງ",
+            "ອະທິບາຍທິດທາງອາຊີບດ້ວຍມຸມມອງຄວາມໝັ້ນຄົງ",
+            "ສະເໜີແຜນການທົດລອງນ້ອຍໆ ກ່ອນໃຫ້ພໍ່ແມ່ຕັດສິນໃຈ"
+          ]
+        }
+      },
+      {
+        "id": 6,
+        "label": "7. ຫຼັກຖານການຄຳນວນ",
+        "content_id": "evidence",
+        "content": {
+          "heading": "ຫຼັກຖານການຄຳນວນ ແລະ ຄວາມໂປ່ງໃສ (Evidence)",
+          "description": "ທຸກຄຳຕອບ ແລະ ສັນຍານທີ່ນຳມາສັງເຄາະ ເພື່ອໃຫ້ທ່ານສາມາດກວດສອບໄດ້ດ້ວຍຕົນເອງ",
+          "system_details": {
+            "form_version": "report.versions.form",
+            "calculation_version": "report.versions.ds",
+            "engine_label": "Pearson Correlation Engine"
+          },
+          "raw_answers": {
+            "source": "userDraft",
+            "display": "[question_id]: option_codes or text_value"
+          }
+        }
+      }
+    ]
+  },
+  "ai_prompt": {
+    "trigger_label": "ຄັດລອກຂໍ້ຄວາມພ້ອມຫຼັກຖານ ໄປຖາມ AI ຕໍ່",
+    "modal_title": "ຄັດລອກຄຳຖາມໄປຄຸຍກັບ AI",
+    "modal_description": "ໃຊ້ເປັນຕົວຊ່ວຍຄິດ ແລະ ສຳຫຼວດໄອເດຍຕໍ່ຍອດກັບ ChatGPT, Claude ຫຼື Gemini",
+    "safety_notice": [
+      "ກະລຸນາກວດສອບຂໍ້ຄວາມກ່ອນສົ່ງ. ຢ່າໃສ່ຂໍ້ມູນສ່ວນຕົວລະອຽດ",
+      "AI ເປັນພຽງ ຜູ້ຊ່ວຍຄິດ ບໍ່ແມ່ນຜູ້ຕັດສິນ ຫຼື ກຳນົດອະນາຄົດ"
+    ],
+    "markdown_sections": [
+      "title_and_context",
+      "raw_answer_evidence",
+      "summary",
+      "observed_patterns",
+      "suggested_exploration_paths",
+      "unknowns_and_open_reflections",
+      "external_ai_questions"
+    ],
+    "external_links": {
+      "chatgpt": "https://chatgpt.com/",
+      "claude": "https://claude.ai/",
+      "gemini": "https://gemini.google.com/"
+    },
+    "copy_actions": [
+      "navigator.clipboard.writeText(markdownContent)",
+      "textarea_execCommand_copy_fallback"
+    ]
+  },
+  "api_and_storage": {
+    "load_report": {
+      "function": "getReport(sessionId)",
+      "endpoint": "/api/v1/sessions/{session_id}/report",
+      "cache": "no-store",
+      "deduplication": "one shared promise per sessionId"
+    },
+    "download_json": {
+      "function": "downloadExport(sessionId, \"json\")",
+      "endpoint": "/api/v1/sessions/{session_id}/export?format=json"
+    },
+    "draft_source": "restoreDraft(localStorage, sessionId)",
+    "reset_actions": ["clearSessionId()", "clearDraft(localStorage)", "router.push('/introduction')"]
+  },
+  "visual_tokens": {
+    "paper": "#F9F8F5",
+    "deep_green": "#2D4C3E",
+    "warm_brown": "#8D5B28",
+    "terracotta": "#7A3E2D",
+    "border": "#E5E1D8",
+    "card": "#FFFFFF"
+  },
+  "known_implementation_notes": [
+    "Radar score visualization is derived from userDraft and has fallback default scores.",
+    "The visible report is driven by ReportResponse; the AI prompt additionally reads questionnaire JSON and userDraft.",
+    "The JSON download is backend export data, not a serialization of the rendered JSX/UI.",
+    "Proof/evidence is shown as the seventh tab; showProof state exists but the current visible implementation uses the tab content.",
+    "The report page is protected from incomplete sessions and stale invalid v4 reports."
+  ]
+}
